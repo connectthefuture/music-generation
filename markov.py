@@ -1,10 +1,10 @@
 
-from music21 import *
-
-from pyknon.genmidi import Midi
-from pyknon.music import Note, NoteSeq
-
 import random
+
+from music21 import corpus, note, stream
+from pyknon.genmidi import Midi
+from pyknon.music import NoteSeq
+
 
 def generate_triples(items):
     """
@@ -13,15 +13,15 @@ def generate_triples(items):
     """
     if len(items) < 3:
         return
-        
+
     for i in range(0, len(items) - 2):
         yield (items[i], items[i+1], items[i+2])
-        
-        
+
+
 class MarkovMusic(object):
     def __init__(self):
         self.transitions = {}
-        
+
     def generate_transitions(self, notes):
         for w1, w2, w3 in generate_triples(notes):
             key = (w1, w2)
@@ -29,7 +29,7 @@ class MarkovMusic(object):
                 self.transitions[key].append(w3)
             except KeyError:
                 self.transitions[key] = [w3]
-                
+
     def generate_song(self, length = 30):
         w1, w2 = random.choice(self.transitions.keys())
         gen_notes = []
@@ -37,7 +37,7 @@ class MarkovMusic(object):
             gen_notes.append(w1)
             w1, w2 = w2, random.choice(self.transitions[(w1,w2)])
         return ' '.join(gen_notes)
-        
+
     def generate_song_file(self, fname, length = 25):
         note_string = self.generate_song(length)
         print note_string
@@ -56,7 +56,6 @@ all_notes = []
 all_durations = []
 for measure in song.getElementsByClass(stream.Measure):
     for n in measure.getElementsByClass(note.Note):
-        #print n.pitch, n.duration.quarterLength
         #Convert to a pykon object
         new_name = str(n.pitch.name.replace('-', 'b'))
         duration = str(int(n.duration.quarterLength * 4))
